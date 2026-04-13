@@ -121,9 +121,7 @@ def generate_synthetic_data(context, num_responses, api_key):
     return response.text
 
 # --- 4. STREAMLIT UI ---
-st.sidebar.markdown("### ⚙️ Settings")
-gemini_api_key = st.sidebar.text_input("Enter Gemini API Key:", type="password")
-st.sidebar.markdown("*Get a free key at [Google AI Studio](https://aistudio.google.com/)*")
+gemini_api_key = st.secrets["GEMINI_API_KEY"]
 
 st.title("🤖 AI Synthetic Survey Generator")
 
