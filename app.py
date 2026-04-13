@@ -115,9 +115,7 @@ def generate_synthetic_data(context, num_responses, api_key):
 # --- 4. STREAMLIT UI ---
 st.set_page_config(page_title="AI Survey Generator", page_icon="🤖")
 
-st.sidebar.markdown("### ⚙️ Settings")
-gemini_api_key = st.sidebar.text_input("Enter Gemini API Key:", type="password")
-st.sidebar.markdown("*Get a free key at [Google AI Studio](https://aistudio.google.com/)*")
+gemini_api_key = st.secrets["GEMINI_API_KEY"]
 
 st.title("🤖 AI Synthetic Survey Generator")
 st.write("Generate highly realistic, context-aware CSV data from any Google Form.")
