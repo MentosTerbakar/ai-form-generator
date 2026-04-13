@@ -15,16 +15,19 @@ SCOPES = ['https://www.googleapis.com/auth/forms.body.readonly']
 
 # --- 1. GOOGLE API LOGIC ---
 def authenticate_google():
-    """Handles the Google Login popup and saves the session token."""
-    creds = None
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-    if not creds or not creds.valid:
-        flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
-        creds = flow.run_local_server(port=0)
-        with open('token.json', 'w') as token:
-            token.write(creds.to_json())
-    return build('forms', 'v1', credentials=creds)
+    """Authenticates using Streamlit's secure cloud secrets."""
+    try:
+        # Load the Google token data from the secure Streamlit vault
+        token_string = st.secrets["google_token_string"]
+        token_info = json.loads(token_string)
+        
+        # Rebuild the credentials
+        creds = Credentials.from_authorized_user_info(info=token_info, scopes=SCOPES)
+        return build('forms', 'v1', credentials=creds)
+        
+    except Exception as e:
+        st.error("🚨 Cloud Authentication Failed. Check Streamlit Secrets!")
+        st.stop()
 
 def fetch_google_form(form_id):
     """Uses the authenticated service to fetch the raw JSON form data."""
