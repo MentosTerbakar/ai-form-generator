@@ -7,7 +7,6 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from google import genai
-#AIzaSyC4K3mSuPxhH9elpNEqs3ZN9SSMr1yYxJc
 
 # --- CONFIGURATION ---
 # This scope tells Google exactly what we want permission to do: Read the form structure.
