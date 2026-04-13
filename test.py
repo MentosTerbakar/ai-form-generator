@@ -14,7 +14,7 @@ st.set_page_config(page_title="AI Survey Generator", page_icon="🤖")
 
 # --- 1. WEB OAUTH LOGIC ---
 def oauth_flow():
-    """Handles the Web OAuth flow to let users log in with their own Google account."""
+    """Handles the Web OAuth flow and preserves the code verifier across reruns."""
     client_config = json.loads(st.secrets["google_client_config"])
     redirect_uri = st.secrets["REDIRECT_URI"]
 
@@ -25,26 +25,34 @@ def oauth_flow():
         redirect_uri=redirect_uri
     )
 
-    # Check if the user is returning from the Google Login screen with a special code in the URL
+    # If the user is returning from Google with a code
     if 'code' in st.query_params:
         try:
-            # Exchange the code for a VIP token
+            # 1. Fetch the verifier from Streamlit's short-term memory
+            if 'oauth_code_verifier' in st.session_state:
+                flow.code_verifier = st.session_state['oauth_code_verifier']
+            
+            # 2. Exchange the code for the VIP token
             flow.fetch_token(code=st.query_params['code'])
-            # Save the token to this user's specific browser session
+            
+            # 3. Save the actual credentials to memory
             st.session_state['google_creds'] = flow.credentials.to_json()
-            # Clean up the URL so it looks nice again
+            
+            # Clean up the URL and reload
             st.query_params.clear()
             st.rerun()
         except Exception as e:
             st.error(f"Authentication failed: {e}")
 
-    # If they already logged in, build the Google service
+    # If they are already fully logged in, build the service
     if 'google_creds' in st.session_state:
         creds = Credentials.from_authorized_user_info(json.loads(st.session_state['google_creds']), SCOPES)
         return build('forms', 'v1', credentials=creds)
 
-    # If they haven't logged in yet, generate the login link and show the button
-    auth_url, _ = flow.authorization_url(prompt='consent')
+    # If they haven't logged in yet, generate the URL and SAVE the verifier to memory!
+    auth_url, state = flow.authorization_url(prompt='consent')
+    st.session_state['oauth_code_verifier'] = flow.code_verifier # <--- THE MAGIC FIX
+
     st.info("👋 Welcome! To generate data for your private Google Forms, please connect your account.")
     st.link_button("🔐 Sign in with Google", auth_url, type="primary")
     return None
