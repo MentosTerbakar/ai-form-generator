@@ -55,6 +55,18 @@ def oauth_flow():
     auth_url, _ = flow.authorization_url(prompt='consent')
     
     st.info("👋 Welcome! To generate data for your private Google Forms, please connect your account.")
+    
+    # --- NEW LOGIN GUIDE UI ---
+    with st.expander("ℹ️ How to bypass the Google Security screen", expanded=True):
+        st.markdown("""
+        Because this is a custom developer tool, Google will show a temporary security warning. Here is how to log in safely:
+        1. Click the **Sign in with Google** button below.
+        2. Select your Google account.
+        3. When you see the *'Google hasn't verified this app'* warning, click **Advanced** at the bottom left.
+        4. Click the link that says **Go to gugelforge.streamlit.app (unsafe)**.
+        5. Click **Continue** to grant the app permission to read your form structure.
+        """)
+    
     st.link_button("🔐 Sign in with Google", auth_url, type="primary")
     
     return None
