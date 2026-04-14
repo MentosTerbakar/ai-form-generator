@@ -10,7 +10,7 @@ from google import genai
 # --- CONFIGURATION ---
 SCOPES = ['https://www.googleapis.com/auth/forms.body.readonly']
 
-st.set_page_config(page_title="AI Survey Generator", page_icon="🤖")
+st.set_page_config(page_title="Synthetic Data for Surveys Generator", page_icon="🤖")
 
 # --- 1. WEB OAUTH LOGIC ---
 def oauth_flow():
