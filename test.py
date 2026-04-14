@@ -127,8 +127,28 @@ def generate_synthetic_data(context, num_responses, api_key):
     SURVEY CONTEXT:
     {context}
     """
-    response = client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
-    return response.text
+    
+    try:
+        # Try the bleeding-edge 2.5 model first
+        response = client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+        return response.text
+        
+    except Exception as primary_error:
+        # If we hit the 503 traffic jam, automatically reroute!
+        if "503" in str(primary_error) or "UNAVAILABLE" in str(primary_error):
+            import streamlit as st # Ensure st is available in this scope
+            st.warning("⚠️ Gemini 2.5 Flash is currently experiencing high traffic. Rerouting to Gemini 2.0 Flash fallback...")
+            
+            try:
+                # Fallback to the highly stable 2.0 model
+                fallback_response = client.models.generate_content(model='gemini-2.0-flash', contents=prompt)
+                return fallback_response.text
+            except Exception as fallback_error:
+                # If BOTH are down, then Google is having a major outage
+                raise Exception("Google's AI servers are currently completely overloaded. Please try again in 5 minutes.")
+        else:
+            # If the error wasn't a 503 traffic jam, raise the original error
+            raise primary_error
 
 # --- 4. STREAMLIT UI ---
 gemini_api_key = st.secrets["GEMINI_API_KEY"]
